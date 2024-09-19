@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,13 +17,22 @@ const statusUnauthorized = http.StatusUnauthorized
 func (app *Config) AuthenticatedOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		cookie, err := r.Cookie("session_token")
-		if err != nil {
-			http.Error(w, http.StatusText(statusUnauthorized), statusUnauthorized)
-			return
+		var tokenString string
+
+		bearerToken := r.Header.Get("Authorization")
+		if bearerToken != "" {
+			bearer := strings.Split(bearerToken, " ")
+			tokenString = bearer[1]
 		}
 
-		tokenString := cookie.Value
+		cookie, err := r.Cookie("session_token")
+		if err != nil && tokenString == "" {
+			http.Error(w, http.StatusText(statusUnauthorized), statusUnauthorized)
+			return
+		} else if cookie != nil && tokenString == "" {
+			tokenString = cookie.Value
+		}
+
 		token, err := util.ParseToken(tokenString)
 		if err != nil {
 			http.Error(w, http.StatusText(statusUnauthorized), statusUnauthorized)

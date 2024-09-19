@@ -11,7 +11,7 @@ import (
 	"tasker/routes/handlers"
 )
 
-const webPort = "8080"
+const webPort = "80"
 
 func main() {
 	// Connect to database

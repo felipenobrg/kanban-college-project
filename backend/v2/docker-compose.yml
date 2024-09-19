@@ -5,9 +5,9 @@ services:
     container_name: tasker-api
     env_file:
       - .env
-    restart: always
+    restart: unless-stopped
     deploy:
       mode: replicated
       replicas: 1
     ports:
-      - "8080:8080"
+      - "8001:80"
